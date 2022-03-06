@@ -36,63 +36,38 @@ fn main() {
         }
         ok
     }
-    println!("two cells in first line");
-    for (i, firstcell) in first_lines.iter().enumerate() {
-        for (j, secondcell) in first_lines.iter().enumerate() {
-            if i >= j {
-                continue
-            }
-            if all_pc_able(firstcell.combine(*secondcell)) {
-                println!("{} {}", i, j);
-            }
-        }
-    }
-    println!("one cell in first line, one in second line");
-    for (i, firstcell) in first_lines.iter().enumerate() {
-        for (j, secondcell) in second_lines.iter().enumerate() {
-            if i > j {
-                continue
-            }
-            if all_pc_able(firstcell.combine(*secondcell)) {
-                println!("{} {}", i, j);
-            }
-        }
-    }
     let first_line_all = first_lines.iter().fold(BitBoard(0), |acc, x| acc.combine(*x));
     let second_line_all = second_lines.iter().fold(BitBoard(0), |acc, x| acc.combine(*x));
     let third_line_all = third_lines.iter().fold(BitBoard(0), |acc, x| acc.combine(*x));
     let fourth_line_all = fourth_lines.iter().fold(BitBoard(0), |acc, x| acc.combine(*x));
 
-    println!("12 cells in all 4 lines");
-    let cells = first_lines.iter().zip(first_lines.iter().rev())
+    first_lines.iter().zip(first_lines.iter().rev())
         .chain(second_lines.iter().zip(second_lines.iter().rev()))
         .chain(third_lines.iter().zip(third_lines.iter().rev()))
-        .chain(fourth_lines.iter().zip(fourth_lines.iter().rev()));
-    cells.combinations(12).map(|cells| {
+        .chain(fourth_lines.iter().zip(fourth_lines.iter().rev()))
+    .combinations(12).filter_map(|cells| {
         let board = cells.iter().fold(BitBoard(0), |acc, (u, _)| acc.combine(**u));
         let mirror = cells.iter().fold(BitBoard(0), |acc, (_, v)| acc.combine(**v));
-        return (board, mirror)
-    }).filter(|(board, mirror)| {
         if board.0 > mirror.0 {
-            return false
+            return None
         }
         if board.0 & first_line_all.0 == first_line_all.0 ||
            board.0 & second_line_all.0 == second_line_all.0 ||
            board.0 & third_line_all.0 == third_line_all.0 ||
            board.0 & fourth_line_all.0 == fourth_line_all.0 {
-            return false
+            return None
         }
         if board.0 & first_line_all.0 == 0 {
-            return false
+            return None
         }
         if board.0 & second_line_all.0 == 0 {
-            return false
+            return None
         }
         if board.0 & third_line_all.0 == 0 && board.0 & fourth_line_all.0 != 0 {
-            return false
+            return None
         }
-        true
-    }).map(|(board, _)| board).par_bridge().filter(|board| all_pc_able(*board)).for_each(|board| {
+        Some(board)
+    }).par_bridge().filter(|board| all_pc_able(*board)).for_each(|board| {
         println!("{}", board.0);
     });
 }
