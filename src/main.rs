@@ -50,21 +50,21 @@ fn main() {
             let right = x & !(x >> 1);
             get_poses(left).into_iter().zip(get_poses(right).into_iter()).collect()
         }
-        let mut ok = true;
+        let mut no_floating = true;
         for (l, r) in get_ranges(upper) {
-            let mut found = false;
+            let mut found_base = false;
             for (l2, r2) in get_ranges(lower) {
                 if l <= r2 && l2 <= r {
-                    found = true;
+                    found_base = true;
                     break
                 }
             }
-            if !found {
-                ok = false;
+            if !found_base {
+                no_floating = false;
                 break
             }
         }
-        ok
+        !no_floating
     }
     first_lines.iter().zip(first_lines.iter().rev())
         .chain(second_lines.iter().zip(second_lines.iter().rev()))
