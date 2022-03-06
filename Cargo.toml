@@ -1,0 +1,11 @@
+[package]
+name = "find-dpc"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+pcf = { git = "https://github.com/MinusKelvin/pcf", rev = "73f14698e4c71affe67f237044fde96b12c7c0e6" }
+itertools = "0.10"
+rayon = "1.5"
