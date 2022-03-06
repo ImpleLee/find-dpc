@@ -66,6 +66,9 @@ fn main() {
         }
         !no_floating
     }
+
+    let COLUMN_MAP = 0b0101010101010101010101010101010101010101u64;
+    let PARITY_MAP = 0b0101010101101010101001010101011010101010u64;
     first_lines.iter().zip(first_lines.iter().rev())
         .chain(second_lines.iter().zip(second_lines.iter().rev()))
         .chain(third_lines.iter().zip(third_lines.iter().rev()))
@@ -86,6 +89,13 @@ fn main() {
         }
         if first == 0 || second == 0 ||
            third == 0 && fourth != 0 {
+            return None
+        }
+        if match ((board.0 & PARITY_MAP).count_ones(), (board.0 & COLUMN_MAP).count_ones()) {
+                (5|7, _) => false,
+                (6|4|8, 6|4|8|2|10) => false,
+                _ => true
+        } {
             return None
         }
         if third == 0 {
