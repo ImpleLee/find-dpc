@@ -69,7 +69,6 @@ fn main() {
 
     let COLUMN_MAP = 0b0101010101010101010101010101010101010101u64;
     let PARITY_MAP = 0b0101010101101010101001010101011010101010u64;
-    let ROW_MAP    = 0b0000000000111111111100000000001111111111u64;
     first_lines.iter().zip(first_lines.iter().rev())
         .chain(second_lines.iter().zip(second_lines.iter().rev()))
         .chain(third_lines.iter().zip(third_lines.iter().rev()))
@@ -92,9 +91,8 @@ fn main() {
            third == 0 && fourth != 0 {
             return None
         }
-        if match ((board.0 & PARITY_MAP).count_ones(), (board.0 & ROW_MAP).count_ones()) {
-            (5|7, 1|3|5|7|9|11) => false,
-            (4|6|8, _) => false,
+        if match (board.0 & PARITY_MAP).count_ones() {
+            4|5|6|7|8 => false,
             _ => true
         } {
             return None
