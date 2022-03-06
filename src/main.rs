@@ -24,7 +24,7 @@ fn main() {
                 true,
                 true,
                 &abort,
-                placeability::simple_srs_spins,
+                placeability::always,
                 |_| {
                     abort.store(true, Ordering::Release);
                 }
@@ -41,6 +41,31 @@ fn main() {
     let third_line_all = third_lines.iter().fold(BitBoard(0), |acc, x| acc.combine(*x));
     let fourth_line_all = fourth_lines.iter().fold(BitBoard(0), |acc, x| acc.combine(*x));
 
+    fn floating(lower: u64, upper: u64) -> bool {
+        fn get_poses(x: u64) -> Vec<u64> {
+            (0..10).filter(|&i| x & (1 << i) != 0).collect()
+        }
+        fn get_ranges(x: u64) -> Vec<(u64, u64)> {
+            let left = x & !(x << 1);
+            let right = x & !(x >> 1);
+            get_poses(left).into_iter().zip(get_poses(right).into_iter()).collect()
+        }
+        let mut ok = true;
+        for (l, r) in get_ranges(upper) {
+            let mut found = false;
+            for (l2, r2) in get_ranges(lower) {
+                if l <= r2 && l2 <= r {
+                    found = true;
+                    break
+                }
+            }
+            if !found {
+                ok = false;
+                break
+            }
+        }
+        ok
+    }
     first_lines.iter().zip(first_lines.iter().rev())
         .chain(second_lines.iter().zip(second_lines.iter().rev()))
         .chain(third_lines.iter().zip(third_lines.iter().rev()))
@@ -51,19 +76,25 @@ fn main() {
         if board.0 > mirror.0 {
             return None
         }
-        if board.0 & first_line_all.0 == first_line_all.0 ||
-           board.0 & second_line_all.0 == second_line_all.0 ||
-           board.0 & third_line_all.0 == third_line_all.0 ||
-           board.0 & fourth_line_all.0 == fourth_line_all.0 {
+        let first = board.0 & first_line_all.0;
+        let second = board.0 & second_line_all.0;
+        let third = board.0 & third_line_all.0;
+        let fourth = board.0 & fourth_line_all.0;
+        if first == first_line_all.0 || second == second_line_all.0 ||
+           third == third_line_all.0 || fourth == fourth_line_all.0 {
             return None
         }
-        if board.0 & first_line_all.0 == 0 {
+        if first == 0 || second == 0 ||
+           third == 0 && fourth != 0 {
             return None
         }
-        if board.0 & second_line_all.0 == 0 {
-            return None
+        if third == 0 {
+            return Some(board)
         }
-        if board.0 & third_line_all.0 == 0 && board.0 & fourth_line_all.0 != 0 {
+        let second_floating = floating(first, second >> 10);
+        let third_floating = floating(second, third >> 10);
+        let fourth_floating = floating(third, fourth >> 10);
+        if (second_floating as u64) + (third_floating as u64) + (fourth_floating as u64) >= 2 {
             return None
         }
         Some(board)
