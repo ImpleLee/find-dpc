@@ -109,8 +109,8 @@ fn main() {
             return Some(board)
         }
         let second_floating = floating(first, second >> 10);
-        let third_floating = floating(second, third >> 10);
-        let fourth_floating = floating(third, fourth >> 10);
+        let third_floating = floating(second >> 10, third >> 20);
+        let fourth_floating = floating(third >> 20, fourth >> 30);
         if (second_floating as u64) + (third_floating as u64) + (fourth_floating as u64) >= 2 {
             return None
         }
